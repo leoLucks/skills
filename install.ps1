@@ -1,29 +1,26 @@
-# Install ecommerce-visual-director for the current Windows user.
-# Run from repository root: powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+# Install all category/skill/SKILL.md folders to the current user's Codex Skills directory.
 $ErrorActionPreference = 'Stop'
-$source = Join-Path $PSScriptRoot 'ecommerce\ecommerce-visual-director'
-$manifest = Join-Path $source 'SKILL.md'
 $destinationRoot = Join-Path $HOME '.agents\skills'
-$destination = Join-Path $destinationRoot 'ecommerce-visual-director'
-
-if (-not (Test-Path -LiteralPath $manifest -PathType Leaf)) {
-    throw "Missing Skill manifest: $manifest"
-}
 New-Item -ItemType Directory -Force -Path $destinationRoot | Out-Null
-
-if (Test-Path -LiteralPath $destination) {
-    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
-    $backup = "$destination.backup.$stamp"
-    if (Test-Path -LiteralPath $backup) {
-        throw "Backup already exists: $backup"
+$count = 0
+foreach ($category in (Get-ChildItem -LiteralPath $PSScriptRoot -Directory)) {
+    if ($category.Name.StartsWith('.')) { continue }
+    foreach ($skill in (Get-ChildItem -LiteralPath $category.FullName -Directory)) {
+        $manifest = Join-Path $skill.FullName 'SKILL.md'
+        if (-not (Test-Path -LiteralPath $manifest -PathType Leaf)) { continue }
+        $destination = Join-Path $destinationRoot $skill.Name
+        if (Test-Path -LiteralPath $destination) {
+            $backup = "$destination.backup.$(Get-Date -Format 'yyyyMMdd-HHmmss-fff')-$PID"
+            Move-Item -LiteralPath $destination -Destination $backup -ErrorAction Stop
+            Write-Host "Backed up: $backup"
+        }
+        Copy-Item -LiteralPath $skill.FullName -Destination $destination -Recurse -ErrorAction Stop
+        if (-not (Test-Path -LiteralPath (Join-Path $destination 'SKILL.md') -PathType Leaf)) {
+            throw "Install verification failed: $destination"
+        }
+        Write-Host "Installed: $($skill.Name) -> $destination"
+        $count++
     }
-    Move-Item -LiteralPath $destination -Destination $backup -ErrorAction Stop
-    Write-Host "Previous Skill backed up to: $backup"
 }
-
-Copy-Item -LiteralPath $source -Destination $destination -Recurse -ErrorAction Stop
-if (-not (Test-Path -LiteralPath (Join-Path $destination 'SKILL.md') -PathType Leaf)) {
-    throw "Installation check failed: missing SKILL.md in $destination"
-}
-Write-Host "Installed: $destination"
-Write-Host 'Restart Codex if needed. Repeat on each new device.'
+if ($count -eq 0) { throw 'No Skills found under category/skill/SKILL.md' }
+Write-Host "Installed $count Skills. Restart Codex if needed."
