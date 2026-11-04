@@ -37,7 +37,7 @@ Windows PowerShell：
 ```powershell
 git clone https://github.com/leoLucks/skills.git
 cd skills
-& .\install.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 以上本地安装脚本会自动发现 `<分类>/<skill>/SKILL.md` 并安装；也可在以后 `git pull` 后再次运行。
