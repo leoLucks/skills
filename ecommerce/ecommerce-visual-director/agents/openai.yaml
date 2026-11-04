@@ -1,0 +1,4 @@
+interface:
+  display_name: "电商视觉总监"
+  short_description: "一键完成电商参考分析、视觉设计、淘宝无线端排版和出图质检"
+  default_prompt: "请使用 $ecommerce-visual-director 完成我的电商视觉任务，自动选择需要的工作步骤，重点保证产品真实、移动端可读和整体高级感。"
