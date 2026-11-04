@@ -15,5 +15,5 @@ if (Test-Path -LiteralPath (Join-Path $repo '.git') -PathType Container) {
     & git clone $url $repo
     if ($LASTEXITCODE -ne 0) { throw 'Git clone failed; installation aborted.' }
 }
-& (Join-Path $repo 'install.ps1')
-if (-not $?) { throw 'Skill installation failed.' }
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'install.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'Skill installation failed.' }
